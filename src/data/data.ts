@@ -11,3 +11,13 @@ export const getTodos = async () => {
     console.error(error);
   }
 };
+
+export const getTodo = async (id: number) => {
+  try {
+    const data = await fetch(`${BASE_URL}/${id}`);
+    const response: Todo[] = await data.json();
+    return response;
+  } catch (error) {
+    console.error(error);
+  }
+};

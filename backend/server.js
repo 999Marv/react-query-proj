@@ -30,6 +30,25 @@ app.get('/todos', (req, res) => {
   });
 });
 
+app.get('/todos/:id', (req, res) => {
+  const todoId = parseInt(req.params.id, 10); // Get the id from the URL and parse it as an integer
+  fs.readFile(dbPath, 'utf8', (err, data) => {
+    if (err) {
+      return res.status(500).json({ message: 'Error reading database' });
+    }
+    try {
+      const db = JSON.parse(data); // Parse the JSON file
+      const todo = db.todos.find((t) => t.id === todoId); // Find the todo with the matching id
+      if (!todo) {
+        return res.status(404).json({ message: 'Todo not found' }); // Return 404 if not found
+      }
+      res.json(todo); // Send the found todo as the response
+    } catch (parseError) {
+      res.status(500).json({ message: 'Error parsing database' });
+    }
+  });
+});
+
 // Add other routes or custom logic here as needed
 // For example, if you want a POST route to modify data:
 app.post('/data', express.json(), (req, res) => {
