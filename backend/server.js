@@ -1,11 +1,14 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const cors = require('cors');
 
 const app = express();
 
 // Set the path to your "db.json" file
 const dbPath = path.join(__dirname, 'db.json');
+
+app.use(cors());
 
 // Middleware to simulate a delay
 app.use((req, res, next) => {
@@ -13,13 +16,17 @@ app.use((req, res, next) => {
 });
 
 // Serve the db.json content on routes
-app.get('/data', (req, res) => {
-  // Read the JSON data from the db.json file
+app.get('/todos', (req, res) => {
   fs.readFile(dbPath, 'utf8', (err, data) => {
     if (err) {
       return res.status(500).json({ message: 'Error reading database' });
     }
-    res.json(JSON.parse(data)); // Send back the JSON data
+    try {
+      const db = JSON.parse(data);
+      res.json(db.todos); // Send only the todos array
+    } catch (parseError) {
+      res.status(500).json({ message: 'Error parsing database' });
+    }
   });
 });
 
@@ -47,7 +54,7 @@ app.post('/data', express.json(), (req, res) => {
 });
 
 // Set your desired port
-const PORT = 8080;
+const PORT = 8000;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
