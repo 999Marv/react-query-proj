@@ -21,3 +21,25 @@ export const getTodo = async (id: number) => {
     console.error(error);
   }
 };
+
+export const createTodo = async (data: Todo) => {
+  try {
+    const response = await fetch('http://localhost:8000/todos', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data), // Send the new todo object
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to create todo');
+    }
+
+    const newTodo: Todo = await response.json();
+    return newTodo; // Return the new todo
+  } catch (error) {
+    console.error('Error creating todo:', error);
+    throw error; // Re-throw for error handling
+  }
+};

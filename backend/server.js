@@ -51,24 +51,30 @@ app.get('/todos/:id', (req, res) => {
 
 // Add other routes or custom logic here as needed
 // For example, if you want a POST route to modify data:
-app.post('/data', express.json(), (req, res) => {
-  // Read current db.json
+app.post('/todos', express.json(), (req, res) => {
   fs.readFile(dbPath, 'utf8', (err, data) => {
     if (err) {
       return res.status(500).json({ message: 'Error reading database' });
     }
-    const db = JSON.parse(data);
+    try {
+      const db = JSON.parse(data); // Parse the JSON data
+      const newTodo = {
+        id: db.todos.length ? db.todos[db.todos.length - 1].id + 1 : 1, // Increment ID
+        ...req.body,
+      };
 
-    // Example of modifying the data
-    db.items.push(req.body); // Assuming your db has an "items" array
+      db.todos.push(newTodo); // Push the new todo to the todos array
 
-    // Save updated data back to db.json
-    fs.writeFile(dbPath, JSON.stringify(db, null, 2), 'utf8', (err) => {
-      if (err) {
-        return res.status(500).json({ message: 'Error writing to database' });
-      }
-      res.status(201).json(db); // Send back updated data
-    });
+      // Save updated data back to db.json
+      fs.writeFile(dbPath, JSON.stringify(db, null, 2), 'utf8', (writeErr) => {
+        if (writeErr) {
+          return res.status(500).json({ message: 'Error writing to database' });
+        }
+        res.status(201).json(newTodo); // Respond with the new todo
+      });
+    } catch (parseError) {
+      res.status(500).json({ message: 'Error parsing database' });
+    }
   });
 });
 
